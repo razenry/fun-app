@@ -21,9 +21,21 @@ export default function Home() {
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
   const traits = [
-    "penyabar", "ambisius", "percaya diri", "pemalu", "cerdas", "kreatif",
-    "romantis", "humoris", "pemikir", "berjiwa pemimpin", "setia",
-    "visioner", "perfeksionis", "mudah bergaul", "mandiri",
+    "penyabar",
+    "ambisius",
+    "percaya diri",
+    "pemalu",
+    "cerdas",
+    "kreatif",
+    "romantis",
+    "humoris",
+    "pemikir",
+    "berjiwa pemimpin",
+    "setia",
+    "visioner",
+    "perfeksionis",
+    "mudah bergaul",
+    "mandiri",
   ];
 
   const getPersonality = (input: string) => {
@@ -34,27 +46,31 @@ export default function Home() {
     return traits[Math.abs(hash % traits.length)];
   };
 
-  // === INPUT HANDLERS ===
   const handleNameChange = (val: string) => {
-    const cleaned = sanitizeName(val);
+    const cleaned = sanitizeName(val); // Hanya huruf, spasi, titik, strip → nama aman
     setName(cleaned);
     checkForBadWords();
   };
 
   const handleClassChange = (val: string) => {
-    const cleaned = sanitizeName(val);
+    // Boleh huruf, angka, spasi, titik, strip, dan slash (contoh: XII/IPS/2)
+    const cleaned = val.replace(/[^a-zA-Z0-9\s\.\-\/]/g, "");
     setClassName(cleaned);
     checkForBadWords();
   };
 
   const handleTelpChange = (val: string) => {
-    const numbersOnly = val.replace(/[^0-9+]/g, "");
+    const numbersOnly = val.replace(/[^0-9+]/g, ""); // Hanya angka + tanda +
     setNotelp(numbersOnly);
     checkForBadWords();
   };
 
   const checkForBadWords = () => {
-    if (containsBadWord(name) || containsBadWord(className) || containsBadWord(notelp)) {
+    if (
+      containsBadWord(name) ||
+      containsBadWord(className) ||
+      containsBadWord(notelp)
+    ) {
       setWarning("Kata tidak sopan terdeteksi! Gunakan bahasa yang baik ya");
     } else {
       setWarning("");
@@ -67,7 +83,11 @@ export default function Home() {
       setResult("Semua field wajib diisi");
       return;
     }
-    if (containsBadWord(name) || containsBadWord(className) || containsBadWord(notelp)) {
+    if (
+      containsBadWord(name) ||
+      containsBadWord(className) ||
+      containsBadWord(notelp)
+    ) {
       setWarning("Tidak bisa submit! Ada kata tidak sopan.");
       setResult("Gunakan bahasa yang baik dan sopan ya");
       return;
@@ -84,11 +104,11 @@ export default function Home() {
       });
       const { exists } = await check.json();
 
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 1200));
       const personality = getPersonality(name.toLowerCase());
 
       setResult("Membaca jati diri...");
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 1200));
       setResult(`Anda adalah seorang yang ${personality}`);
 
       if (!exists) {
@@ -116,7 +136,7 @@ export default function Home() {
     es.onmessage = (e) => {
       try {
         const data: User[] = JSON.parse(e.data);
-        const safe = data.map(u => ({
+        const safe = data.map((u) => ({
           ...u,
           name: censorText(u.name),
           personality: censorText(u.personality),
@@ -135,7 +155,10 @@ export default function Home() {
       scrollInterval.current = setInterval(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop += 1;
-          if (scrollRef.current.scrollTop + scrollRef.current.clientHeight >= scrollRef.current.scrollHeight - 10) {
+          if (
+            scrollRef.current.scrollTop + scrollRef.current.clientHeight >=
+            scrollRef.current.scrollHeight - 10
+          ) {
             scrollRef.current.scrollTop = 0;
           }
         }
@@ -149,23 +172,45 @@ export default function Home() {
       <div className="min-h-screen p-4 sm:p-10 bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
         {/* Form */}
         <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 sm:p-8">
-          <h1 className="text-3xl font-bold text-green-700 text-center mb-2">Cek Kepribadian</h1>
-          <p className="text-green-800 text-center mb-6 text-sm">Masukkan data dan temukan jati dirimu</p>
+          <h1 className="text-3xl font-bold text-green-700 text-center mb-2">
+            Cek Kepribadian
+          </h1>
+          <p className="text-green-800 text-center mb-6 text-sm">
+            Masukkan data dan temukan jati dirimu
+          </p>
 
           <div className="space-y-5">
-            <input type="text" placeholder="Nama lengkap" value={name} onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition" />
+            <input
+              type="text"
+              placeholder="Nama lengkap"
+              value={name}
+              onChange={(e) => handleNameChange(e.target.value)}
+              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition"
+            />
 
-            <input type="text" placeholder="Kelas (contoh: XII IPA 3)" value={className} onChange={(e) => handleClassChange(e.target.value)}
-              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition" />
+            <input
+              type="text"
+              placeholder="Kelas (contoh: XII IPA 3)"
+              value={className}
+              onChange={(e) => handleClassChange(e.target.value)}
+              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition"
+            />
 
-            <input type="text" placeholder="Nomor Telepon (contoh: 08123456789)" value={notelp} onChange={(e) => handleTelpChange(e.target.value)}
-              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition" />
+            <input
+              type="text"
+              placeholder="Nomor Telepon (contoh: 08123456789)"
+              value={notelp}
+              onChange={(e) => handleTelpChange(e.target.value)}
+              className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition"
+            />
           </div>
 
           <div className="flex justify-center mt-8">
-            <button onClick={handleSubmit} disabled={loading}
-              className="py-4 px-10 text-lg font-bold bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl shadow-xl hover:shadow-2xl hover:opacity-90 transition active:scale-95 disabled:opacity-50">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="py-4 px-10 text-lg font-bold bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl shadow-xl hover:shadow-2xl hover:opacity-90 transition active:scale-95 disabled:opacity-50"
+            >
               {loading ? "Memproses..." : "Cek Sekarang"}
             </button>
           </div>
@@ -185,16 +230,28 @@ export default function Home() {
 
         {/* Leaderboard */}
         <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 flex flex-col relative">
-          <h2 className="text-2xl font-bold text-green-700 text-center mb-4">Papan Jati Diri</h2>
-          <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3" style={{ paddingBottom: "120px" }}>
+          <h2 className="text-2xl font-bold text-green-700 text-center mb-4">
+            Papan Jati Diri
+          </h2>
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto space-y-3"
+            style={{ paddingBottom: "120px" }}
+          >
             {users.map((u) => (
               <div
                 key={u.id}
                 className="p-4 bg-green-100/80 rounded-xl text-green-900 font-medium flex justify-between items-center cursor-pointer hover:bg-green-200 transition shadow-md"
-                onClick={() => setTooltipData(tooltipData?.id === u.id ? null : u)}
+                onClick={() =>
+                  setTooltipData(tooltipData?.id === u.id ? null : u)
+                }
               >
-                <span className="truncate max-w-[45%] font-semibold">{u.name}</span>
-                <span className="truncate max-w-[45%] italic text-green-700">{u.personality}</span>
+                <span className="truncate max-w-[45%] font-semibold">
+                  {u.name}
+                </span>
+                <span className="truncate max-w-[45%] italic text-green-700">
+                  {u.personality}
+                </span>
               </div>
             ))}
           </div>
@@ -207,8 +264,12 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-800 text-white rounded-xl px-6 py-5 shadow-2xl border-4 border-green-600">
             <div className="font-bold text-green-200 text-lg mb-2">Detail</div>
             <div className="text-sm space-y-1">
-              <div><strong>Nama:</strong> {tooltipData.name}</div>
-              <div><strong>Kepribadian:</strong> {tooltipData.personality}</div>
+              <div>
+                <strong>Nama:</strong> {tooltipData.name}
+              </div>
+              <div>
+                <strong>Kepribadian:</strong> {tooltipData.personality}
+              </div>
             </div>
             {/* Tombol close */}
             <button
@@ -232,8 +293,14 @@ export default function Home() {
       {/* Animasi */}
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
       `}</style>
     </>
