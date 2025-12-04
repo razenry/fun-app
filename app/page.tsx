@@ -16,7 +16,7 @@ export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
   const [tooltipId, setTooltipId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollInterval = useRef<NodeJS.Timer | null>(null);
+  const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const traits = [
     "penyabar","ambisius","percaya diri","pemalu","cerdas","kreatif",
@@ -104,7 +104,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen p-4 sm:p-10 bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
-      
       {/* LEFT SECTION - Form */}
       <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 sm:p-8 animate-fadeIn">
         <h1 className="text-3xl font-bold text-green-700 text-center mb-2">
@@ -162,66 +161,36 @@ export default function Home() {
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto space-y-2 relative"
+          style={{ paddingBottom: "100px" }} // pastikan data bawah tidak ketutupan
         >
-          {users.map((u) => {
-            const isTooltipOpen = tooltipId === u.id;
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className="p-3 bg-green-100/70 rounded-xl text-green-900 font-medium flex justify-between items-center animate-slideIn relative cursor-pointer"
+              onClick={() => setTooltipId(tooltipId === u.id ? null : u.id)}
+            >
+              <span className="truncate max-w-[45%]">{u.name}</span>
+              <span className="truncate max-w-[45%] italic">{u.personality}</span>
 
-            return (
-              <div
-                key={u.id}
-                className="p-3 bg-green-100/70 rounded-xl text-green-900 font-medium flex justify-between items-center animate-slideIn relative cursor-pointer"
-                onClick={() =>
-                  setTooltipId(isTooltipOpen ? null : u.id)
-                }
-              >
-                <span className="truncate max-w-[45%]">{u.name}</span>
-                <span className="truncate max-w-[45%] italic">{u.personality}</span>
-
-                {/* Tooltip responsive */}
-                {isTooltipOpen && scrollRef.current && (
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 bg-green-200 text-green-900 rounded-lg p-2 text-sm shadow-lg z-10 w-max min-w-[150px] text-center animate-fadeIn"
-                    style={{
-                      top: (() => {
-                        const container = scrollRef.current!;
-                        const rect = container.getBoundingClientRect();
-                        const itemIndex = users.findIndex(u2 => u2.id === u.id);
-                        const itemOffset = itemIndex * 50; // approx height
-                        // if item terlalu bawah, tampilkan tooltip di atas
-                        if (itemOffset + 60 > container.scrollTop + container.clientHeight) {
-                          return "auto";
-                        }
-                        return "100%";
-                      })(),
-                      bottom: (() => {
-                        const container = scrollRef.current!;
-                        const itemIndex = users.findIndex(u2 => u2.id === u.id);
-                        const itemOffset = itemIndex * 50;
-                        if (itemOffset + 60 > container.scrollTop + container.clientHeight) {
-                          return "100%";
-                        }
-                        return "auto";
-                      })(),
-                      marginTop: 4,
-                    }}
-                  >
-                    <div><strong>Nama:</strong> {u.name}</div>
-                    <div><strong>Personality:</strong> {u.personality}</div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              {/* Tooltip untuk mobile touch */}
+              {tooltipId === u.id && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 bg-green-200 text-green-900 rounded-lg p-2 text-sm shadow-lg z-10 w-max min-w-[150px] text-center">
+                  <div><strong>Nama:</strong> {u.name}</div>
+                  <div><strong>Personality:</strong> {u.personality}</div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       <style>{`
-        .animate-fadeIn { animation: fadeIn .5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px);} to {opacity:1; transform: translateY(0);} }
+        .animate-fadeIn { animation: fadeIn .7s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} }
         .animate-pop { animation: pop .35s ease-out; }
-        @keyframes pop { from { opacity: 0; transform: scale(.85);} to {opacity:1; transform: scale(1);} }
+        @keyframes pop { from { opacity: 0; transform: scale(.85);} }
         .animate-slideIn { animation: slideIn .5s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} }
       `}</style>
     </div>
   );
