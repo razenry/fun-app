@@ -54,7 +54,7 @@ export default function Home() {
 
     setResult(`✨ Membaca jati diri...`);
     await new Promise((res) => setTimeout(res, 1200));
-    setResult(`✨ Kepribadian ${name}: ${personality}`);
+    setResult(`✨  Anda adalah seorang yg ${personality}`);
 
     if (!isRegistered) {
       await fetch("/api/register", {
