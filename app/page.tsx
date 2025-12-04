@@ -176,7 +176,7 @@ export default function Home() {
             Cek Kepribadian
           </h1>
           <p className="text-green-800 text-center mb-6 text-sm">
-            Masukkan data dan temukan jati dirimu
+            Masukkan data dan temukan kepribadian dirimu
           </p>
 
           <div className="space-y-5">
@@ -231,7 +231,7 @@ export default function Home() {
         {/* Leaderboard */}
         <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 flex flex-col relative">
           <h2 className="text-2xl font-bold text-green-700 text-center mb-4">
-            Papan Jati Diri
+            Papan Kepribadian
           </h2>
           <div
             ref={scrollRef}
