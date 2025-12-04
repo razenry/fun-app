@@ -14,24 +14,14 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [tooltipId, setTooltipId] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollInterval = useRef<NodeJS.Timer | null>(null);
 
   const traits = [
-    "penyabar",
-    "ambisius",
-    "percaya diri",
-    "pemalu",
-    "cerdas",
-    "kreatif",
-    "romantis",
-    "humoris",
-    "pemikir",
-    "berjiwa pemimpin",
-    "setia",
-    "visioner",
-    "perfeksionis",
-    "mudah bergaul",
-    "mandiri",
+    "penyabar","ambisius","percaya diri","pemalu","cerdas","kreatif",
+    "romantis","humoris","pemikir","berjiwa pemimpin","setia",
+    "visioner","perfeksionis","mudah bergaul","mandiri",
   ];
 
   const getPersonality = (input: string) => {
@@ -93,8 +83,10 @@ export default function Home() {
 
   // Auto scroll vertikal leaderboard
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
+    if (scrollInterval.current) clearInterval(scrollInterval.current);
+
+    scrollInterval.current = setInterval(() => {
+      if (scrollRef.current && tooltipId === null) {
         scrollRef.current.scrollTop += 1;
         if (
           scrollRef.current.scrollTop + scrollRef.current.clientHeight >=
@@ -104,11 +96,15 @@ export default function Home() {
         }
       }
     }, 50);
-    return () => clearInterval(interval);
-  }, [users]);
+
+    return () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+    };
+  }, [users, tooltipId]);
 
   return (
     <div className="min-h-screen p-4 sm:p-10 bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
+      
       {/* LEFT SECTION - Form */}
       <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 sm:p-8 animate-fadeIn">
         <h1 className="text-3xl font-bold text-green-700 text-center mb-2">
@@ -119,24 +115,22 @@ export default function Home() {
         </p>
 
         <div className="space-y-4">
-          {["Nama lengkap", "Kelas", "Nomor Telepon"].map(
-            (placeholder, idx) => {
-              const value = [name, className, notelp][idx];
-              const setter = [setName, setClassName, setNotelp][idx];
-              return (
-                <input
-                  key={idx}
-                  type="text"
-                  value={value}
-                  placeholder={placeholder}
-                  onChange={(e) => setter(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
+          {["Nama lengkap","Kelas","Nomor Telepon"].map((placeholder, idx) => {
+            const value = [name,className,notelp][idx];
+            const setter = [setName,setClassName,setNotelp][idx];
+            return (
+              <input
+                key={idx}
+                type="text"
+                value={value}
+                placeholder={placeholder}
+                onChange={(e) => setter(e.target.value)}
+                className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
                            border border-green-300 focus:ring-2 focus:ring-green-500 
                            focus:outline-none shadow-sm transition"
-                />
-              );
-            }
-          )}
+              />
+            );
+          })}
         </div>
 
         <div className="flex justify-center mt-6">
@@ -144,19 +138,17 @@ export default function Home() {
             onClick={handleSubmit}
             disabled={loading}
             className="py-3 px-6 text-base sm:text-lg
-               bg-gradient-to-r from-green-600 to-green-500 text-white
-               font-semibold rounded-xl shadow-lg hover:opacity-90
-               transition active:scale-95 disabled:opacity-50"
+                       bg-gradient-to-r from-green-600 to-green-500 text-white
+                       font-semibold rounded-xl shadow-lg hover:opacity-90
+                       transition active:scale-95 disabled:opacity-50"
           >
             {loading ? "Memproses..." : "Cek Sekarang"}
           </button>
         </div>
 
         {result && (
-          <p
-            className="mt-6 bg-white/70 p-4 rounded-xl border border-green-200 
-                        text-green-800 text-center animate-pop font-medium shadow"
-          >
+          <p className="mt-6 bg-white/70 p-4 rounded-xl border border-green-200 
+                        text-green-800 text-center animate-pop font-medium shadow">
             {result}
           </p>
         )}
@@ -169,32 +161,67 @@ export default function Home() {
         </h2>
         <div
           ref={scrollRef}
-          className="flex-1 overflow-hidden space-y-2 relative"
-          onMouseEnter={() =>
-            scrollRef.current &&
-            clearInterval((scrollRef.current as any)._scrollInterval)
-          }
-          onMouseLeave={() => {}}
+          className="flex-1 overflow-y-auto space-y-2 relative"
         >
-          {users.map((u) => (
-            <div
-              key={u.id}
-              className="p-3 bg-green-100/70 rounded-xl text-green-900 font-medium flex justify-between items-center animate-slideIn"
-            >
-              <span className="truncate">{u.name}</span>
-              <span className="truncate italic">{u.personality}</span>
-            </div>
-          ))}
+          {users.map((u) => {
+            const isTooltipOpen = tooltipId === u.id;
+
+            return (
+              <div
+                key={u.id}
+                className="p-3 bg-green-100/70 rounded-xl text-green-900 font-medium flex justify-between items-center animate-slideIn relative cursor-pointer"
+                onClick={() =>
+                  setTooltipId(isTooltipOpen ? null : u.id)
+                }
+              >
+                <span className="truncate max-w-[45%]">{u.name}</span>
+                <span className="truncate max-w-[45%] italic">{u.personality}</span>
+
+                {/* Tooltip responsive */}
+                {isTooltipOpen && scrollRef.current && (
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 bg-green-200 text-green-900 rounded-lg p-2 text-sm shadow-lg z-10 w-max min-w-[150px] text-center animate-fadeIn"
+                    style={{
+                      top: (() => {
+                        const container = scrollRef.current!;
+                        const rect = container.getBoundingClientRect();
+                        const itemIndex = users.findIndex(u2 => u2.id === u.id);
+                        const itemOffset = itemIndex * 50; // approx height
+                        // if item terlalu bawah, tampilkan tooltip di atas
+                        if (itemOffset + 60 > container.scrollTop + container.clientHeight) {
+                          return "auto";
+                        }
+                        return "100%";
+                      })(),
+                      bottom: (() => {
+                        const container = scrollRef.current!;
+                        const itemIndex = users.findIndex(u2 => u2.id === u.id);
+                        const itemOffset = itemIndex * 50;
+                        if (itemOffset + 60 > container.scrollTop + container.clientHeight) {
+                          return "100%";
+                        }
+                        return "auto";
+                      })(),
+                      marginTop: 4,
+                    }}
+                  >
+                    <div><strong>Nama:</strong> {u.name}</div>
+                    <div><strong>Personality:</strong> {u.personality}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       <style>{`
-        .animate-fadeIn { animation: fadeIn .7s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} }
+        .animate-fadeIn { animation: fadeIn .5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px);} to {opacity:1; transform: translateY(0);} }
         .animate-pop { animation: pop .35s ease-out; }
-        @keyframes pop { from { opacity: 0; transform: scale(.85);} }
+        @keyframes pop { from { opacity: 0; transform: scale(.85);} to {opacity:1; transform: scale(1);} }
         .animate-slideIn { animation: slideIn .5s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
       `}</style>
     </div>
   );
