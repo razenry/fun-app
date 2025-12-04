@@ -216,7 +216,7 @@ export default function Home() {
           </div>
 
           {result && (
-            <p className="mt-6 bg-white/80 p-5 rounded-xl border-2 border-green-300 text-green-800 text-center font-semibold shadow-lg">
+            <p className="mt-6 bg-white/80 p-5 rounded-xl border-2 border-yellow-300 text-yellow-800 text-center font-semibold shadow-lg">
               {result}
             </p>
           )}
