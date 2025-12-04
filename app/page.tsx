@@ -1,5 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
+interface User {
+  id: number;
+  name: string;
+  personality: string;
+}
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -7,6 +13,8 @@ export default function Home() {
   const [notelp, setNotelp] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const traits = [
     "penyabar",
@@ -43,26 +51,21 @@ export default function Home() {
     setLoading(true);
     setResult("");
 
-    // ⬅ cek apakah nomor telp sudah ada
     const check = await fetch("/api/register/check", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notelp }),
     });
-
     const checkData = await check.json();
     const isRegistered = checkData.exists === true;
 
-    // 1️⃣ Generate personality dulu (baik sudah terdaftar atau belum)
     await new Promise((res) => setTimeout(res, 1200));
     const personality = getPersonality(name.toLowerCase());
 
     setResult(`✨ Membaca jati diri...`);
     await new Promise((res) => setTimeout(res, 1200));
-
     setResult(`✨ Kepribadian ${name}: ${personality}`);
 
-    // 2️⃣ Jika nomor BELUM terdaftar → simpan ke DB
     if (!isRegistered) {
       await fetch("/api/register", {
         method: "POST",
@@ -74,15 +77,40 @@ export default function Home() {
     setLoading(false);
   };
 
+  // SSE untuk leaderboard realtime
+  useEffect(() => {
+    const eventSource = new EventSource("/api/users/stream");
+    eventSource.onmessage = (event) => {
+      try {
+        const data: User[] = JSON.parse(event.data);
+        setUsers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    return () => eventSource.close();
+  }, []);
+
+  // Auto scroll vertikal leaderboard
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop += 1;
+        if (
+          scrollRef.current.scrollTop + scrollRef.current.clientHeight >=
+          scrollRef.current.scrollHeight
+        ) {
+          scrollRef.current.scrollTop = 0;
+        }
+      }
+    }, 50);
+    return () => clearInterval(interval);
+  }, [users]);
+
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 
-                    bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white"
-    >
-      <div
-        className="backdrop-blur-xl bg-white/50 border border-white/70 
-                      shadow-xl rounded-3xl p-8 w-full max-w-md animate-fadeIn"
-      >
+    <div className="min-h-screen p-4 sm:p-10 bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
+      {/* LEFT SECTION - Form */}
+      <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 sm:p-8 animate-fadeIn">
         <h1 className="text-3xl font-bold text-green-700 text-center mb-2">
           Cek Kepribadian
         </h1>
@@ -91,46 +119,38 @@ export default function Home() {
         </p>
 
         <div className="space-y-4">
-          <input
-            type="text"
-            value={name}
-            placeholder="Nama lengkap"
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
-                       border border-green-300 focus:ring-2 focus:ring-green-500 
-                       focus:outline-none shadow-sm"
-          />
-
-          <input
-            type="text"
-            value={className}
-            placeholder="Kelas"
-            onChange={(e) => setClassName(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
-                       border border-green-300 focus:ring-2 focus:ring-green-500 
-                       focus:outline-none shadow-sm"
-          />
-
-          <input
-            type="text"
-            value={notelp}
-            placeholder="Nomor Telepon"
-            onChange={(e) => setNotelp(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
-                       border border-green-300 focus:ring-2 focus:ring-green-500 
-                       focus:outline-none shadow-sm"
-          />
+          {["Nama lengkap", "Kelas", "Nomor Telepon"].map(
+            (placeholder, idx) => {
+              const value = [name, className, notelp][idx];
+              const setter = [setName, setClassName, setNotelp][idx];
+              return (
+                <input
+                  key={idx}
+                  type="text"
+                  value={value}
+                  placeholder={placeholder}
+                  onChange={(e) => setter(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500
+                           border border-green-300 focus:ring-2 focus:ring-green-500 
+                           focus:outline-none shadow-sm transition"
+                />
+              );
+            }
+          )}
         </div>
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="mt-6 w-full py-3 bg-gradient-to-r from-green-600 to-green-500 
-                     text-white font-semibold rounded-xl shadow-lg hover:opacity-90 
-                     transition active:scale-95 disabled:opacity-50"
-        >
-          {loading ? "Memproses..." : "Cek Sekarang"}
-        </button>
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="py-3 px-6 text-base sm:text-lg
+               bg-gradient-to-r from-green-600 to-green-500 text-white
+               font-semibold rounded-xl shadow-lg hover:opacity-90
+               transition active:scale-95 disabled:opacity-50"
+          >
+            {loading ? "Memproses..." : "Cek Sekarang"}
+          </button>
+        </div>
 
         {result && (
           <p
@@ -142,11 +162,39 @@ export default function Home() {
         )}
       </div>
 
+      {/* RIGHT SECTION - Leaderboard */}
+      <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-4 sm:p-6 animate-fadeIn flex flex-col">
+        <h2 className="text-2xl font-bold text-green-700 mb-4 text-center">
+          Leaderboard
+        </h2>
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-hidden space-y-2 relative"
+          onMouseEnter={() =>
+            scrollRef.current &&
+            clearInterval((scrollRef.current as any)._scrollInterval)
+          }
+          onMouseLeave={() => {}}
+        >
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className="p-3 bg-green-100/70 rounded-xl text-green-900 font-medium flex justify-between items-center animate-slideIn"
+            >
+              <span className="truncate">{u.name}</span>
+              <span className="truncate italic">{u.personality}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <style>{`
         .animate-fadeIn { animation: fadeIn .7s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} }
         .animate-pop { animation: pop .35s ease-out; }
         @keyframes pop { from { opacity: 0; transform: scale(.85);} }
+        .animate-slideIn { animation: slideIn .5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px);} }
       `}</style>
     </div>
   );
