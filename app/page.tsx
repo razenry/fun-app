@@ -236,7 +236,7 @@ export default function Home() {
 
             <input
               type="text"
-              placeholder="Kelas (contoh: XII IPA 3)"
+              placeholder="Kelas (contoh: 9A)"
               value={className}
               onChange={(e) => handleClassChange(e.target.value)}
               className="w-full p-3 rounded-xl bg-white text-gray-900 placeholder-gray-500 border border-green-300 focus:ring-2 focus:ring-green-500 focus:outline-none shadow-sm transition"
