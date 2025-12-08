@@ -1,6 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { containsBadWord, censorText, sanitizeName } from "@/lib/badwords";
+import {
+  containsBadWord,
+  censorText,
+  sanitizeName,
+  sanitizeKelas,
+} from "@/lib/badwords";
 
 interface User {
   id: number;
@@ -163,7 +168,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: sanitizeName(name),
-            className: sanitizeName(className),
+            className: sanitizeKelas(className),
             notelp,
             personality: censorText(personality),
           }),

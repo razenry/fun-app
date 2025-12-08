@@ -255,3 +255,7 @@ export const censorText = (text: string): string => {
 export const sanitizeName = (text: string): string => {
   return text.replace(/[^a-zA-Z\s\.\-]/g, "");
 };
+
+export const sanitizeKelas = (text: string): string => {
+  return text.replace(/[^a-zA-Z0-9\s.\-]/g, "");
+};
