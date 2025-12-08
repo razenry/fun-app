@@ -105,7 +105,7 @@ export default function Home() {
 
   const handleClassChange = (val: string) => {
     // Boleh huruf, angka, spasi, titik, strip, dan slash (contoh: XII/IPS/2)
-    const cleaned = val.replace(/[^a-zA-Z0-9\s\.\-\/]/g, "");
+    const cleaned = sanitizeKelas(val);
     setClassName(cleaned);
     checkForBadWords();
   };
