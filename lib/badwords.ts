@@ -179,11 +179,9 @@ const RAW_BADWORDS = [
   "b3go",
   "b3g0",
   "b3gok",
-  "ajg" ,
 
   // === SIMBOL & SPASI TRIK ===
   "a n j i n g",
-  "a j g",
   "a n j i n g",
   "an jing",
   "an.jing",
