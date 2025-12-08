@@ -215,7 +215,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen p-4 sm:p-10 bg-gradient-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
+      <div className="min-h-screen p-4 sm:p-10 bg-linear-to-br from-[#b9ffd6] via-[#e9fff1] to-white flex flex-col lg:flex-row gap-6">
         {/* Form */}
         <div className="flex-1 backdrop-blur-xl bg-white/60 border border-white/50 shadow-lg rounded-3xl p-6 sm:p-8">
           <h1 className="text-3xl font-bold text-green-700 text-center mb-2">
@@ -255,7 +255,7 @@ export default function Home() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="py-4 px-10 text-lg font-bold bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl shadow-xl hover:shadow-2xl hover:opacity-90 transition active:scale-95 disabled:opacity-50"
+              className="py-4 px-10 text-lg font-bold bg-linear-to-r from-green-600 to-green-500 text-white rounded-xl shadow-xl hover:shadow-2xl hover:opacity-90 transition active:scale-95 disabled:opacity-50"
             >
               {loading ? "Memproses..." : "Cek Sekarang"}
             </button>
@@ -306,7 +306,7 @@ export default function Home() {
 
       {/* TOOLTIP PORTAL – SELALU DI ATAS SEGALANYA */}
       {tooltipData && (
-        <div className="fixed inset-0 pointer-events-none z-[9999]">
+        <div className="fixed inset-0 pointer-events-none z-9999">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-800 text-white rounded-xl px-6 py-5 shadow-2xl border-4 border-green-600">
             <div className="font-bold text-green-200 text-lg mb-2">Detail</div>
             <div className="text-sm space-y-1">
